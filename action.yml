@@ -106,4 +106,4 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: compiled-script
-        path: ${{ inputs.output-file }}
+        path: SannyBuilder/${{ inputs.output-file }}
