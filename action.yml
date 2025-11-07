@@ -40,7 +40,7 @@ runs:
       shell: powershell
       run: |
         Write-Host "Extracting SannyBuilder.zip"
-        Expand-Archive -Path "SannyBuilder.zip" -DestinationPath "SannyBuilder" -Force
+        Expand-Archive -Path "SannyBuilder.zip" -DestinationPath "." -Force
         
     - name: Compile Script
       id: compile
@@ -52,7 +52,7 @@ runs:
         Write-Host "Compiling $inputFile to $outputFile"
         
         # Find sanny.exe in the extracted directory
-        $sannyExe = Get-ChildItem -Path "SannyBuilder" -Filter "sanny.exe" -Recurse | Select-Object -First 1
+        $sannyExe = Get-ChildItem -Path "." -Filter "sanny.exe" -Recurse | Select-Object -First 1
         
         if (-not $sannyExe) {
             Write-Error "sanny.exe not found in extracted archive"
@@ -107,4 +107,4 @@ runs:
       uses: actions/upload-artifact@v4
       with:
         name: compiled-script
-        path: SannyBuilder\${{ inputs.output-file }}
+        path: ${{ inputs.output-file }}
