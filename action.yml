@@ -61,8 +61,13 @@ runs:
         
         Write-Host "Found sanny.exe at: $($sannyExe.FullName)"
         
-        # Run the compiler
+        # Run the compiler and capture exit code
         & $sannyExe.FullName --compile $inputFile $outputFile
+        $exitCode = $LASTEXITCODE
+        
+        if ($exitCode -ne 0) {
+            Write-Host "Compilation exited with code: $exitCode"
+        }
         
     - name: Check for Errors
       id: check-log
@@ -73,7 +78,17 @@ runs:
             if ($logContent.Length -gt 0) {
                 Write-Host "Compilation failed. Error log content:"
                 Write-Host $logContent
-                echo "error-log=$logContent" >> $env:GITHUB_OUTPUT
+                
+                # Write error log to a file for proper handling
+                $logFile = "error-log.txt"
+                $logContent | Out-File -FilePath $logFile -Encoding utf8
+                
+                # Use heredoc for multi-line output
+                $delimiter = "EOF_ERROR_LOG_$(Get-Random)"
+                "error-log<<$delimiter" >> $env:GITHUB_OUTPUT
+                $logContent >> $env:GITHUB_OUTPUT
+                $delimiter >> $env:GITHUB_OUTPUT
+                
                 echo "success=false" >> $env:GITHUB_OUTPUT
                 exit 1
             } else {
