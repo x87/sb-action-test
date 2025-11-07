@@ -1,4 +1,4 @@
-name: 'SannyBuilder Compile'
+name: 'sb-compile-action'
 description: 'Downloads SannyBuilder and compiles a script file'
 branding:
   icon: 'code'
@@ -13,9 +13,9 @@ inputs:
     required: false
     default: 'output.cs'
   sanny-version:
-    description: 'SannyBuilder version to download'
+    description: 'SannyBuilder version to download (e.g., v4.2.0 or latest)'
     required: false
-    default: 'v4.2.0'
+    default: 'latest'
   mode:
     description: 'Edit mode (e.g., sa_sbl, vc_sbl, gta3_sbl)'
     required: false
@@ -36,6 +36,15 @@ runs:
       shell: powershell
       run: |
         $version = "${{ inputs.sanny-version }}"
+        
+        if ($version -eq "latest") {
+            Write-Host "Fetching latest release information..."
+            $apiUrl = "https://api.github.com/repos/sannybuilder/dev/releases/latest"
+            $release = Invoke-RestMethod -Uri $apiUrl
+            $version = $release.tag_name
+            Write-Host "Latest version is: $version"
+        }
+        
         $url = "https://github.com/sannybuilder/dev/releases/download/$version/SannyBuilder-$version.zip"
         Write-Host "Downloading SannyBuilder from $url"
         Invoke-WebRequest -Uri $url -OutFile "SannyBuilder.zip"
