@@ -1,0 +1,38 @@
+name: Test SannyBuilder Compile
+
+on:
+  workflow_dispatch:
+    inputs:
+      input-file:
+        description: 'Path to the input script file'
+        required: true
+        default: 'script.txt'
+      output-file:
+        description: 'Path to the output file'
+        required: false
+        default: 'output.scm'
+
+jobs:
+  compile:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Compile with SannyBuilder
+        uses: ./
+        with:
+          input-file: ${{ github.event.inputs.input-file || 'script.txt' }}
+          output-file: ${{ github.event.inputs.output-file || 'output.scm' }}
+          
+      - name: Display Results
+        if: always()
+        shell: powershell
+        run: |
+          Write-Host "Compilation workflow completed"
+          if (Test-Path "${{ github.event.inputs.output-file || 'output.scm' }}") {
+            Write-Host "Output file created successfully"
+          }

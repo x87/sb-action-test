@@ -1,0 +1,10 @@
+// Sample SannyBuilder Script
+// This is a basic example script
+
+{$CLEO .cs}
+
+0000: NOP
+
+:MAIN_LOOP
+wait 0
+jump @MAIN_LOOP

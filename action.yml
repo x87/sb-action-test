@@ -1,0 +1,108 @@
+name: 'SannyBuilder Compile'
+description: 'Downloads SannyBuilder and compiles a script file'
+branding:
+  icon: 'code'
+  color: 'blue'
+
+inputs:
+  input-file:
+    description: 'Path to the input script file to compile'
+    required: true
+  output-file:
+    description: 'Path to the output compiled file'
+    required: false
+    default: 'output.scm'
+  sanny-version:
+    description: 'SannyBuilder version to download'
+    required: false
+    default: 'v4.2.0'
+
+outputs:
+  success:
+    description: 'Whether compilation was successful'
+    value: ${{ steps.compile.outputs.success }}
+  error-log:
+    description: 'Content of error log if compilation failed'
+    value: ${{ steps.check-log.outputs.error-log }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Download SannyBuilder
+      shell: powershell
+      run: |
+        $version = "${{ inputs.sanny-version }}"
+        $url = "https://github.com/sannybuilder/dev/releases/download/$version/SannyBuilder-$version.zip"
+        Write-Host "Downloading SannyBuilder from $url"
+        Invoke-WebRequest -Uri $url -OutFile "SannyBuilder.zip"
+        
+    - name: Unpack SannyBuilder
+      shell: powershell
+      run: |
+        Write-Host "Extracting SannyBuilder.zip"
+        Expand-Archive -Path "SannyBuilder.zip" -DestinationPath "SannyBuilder" -Force
+        
+    - name: Compile Script
+      id: compile
+      shell: powershell
+      run: |
+        $inputFile = "${{ inputs.input-file }}"
+        $outputFile = "${{ inputs.output-file }}"
+        
+        Write-Host "Compiling $inputFile to $outputFile"
+        
+        # Find sanny.exe in the extracted directory
+        $sannyExe = Get-ChildItem -Path "SannyBuilder" -Filter "sanny.exe" -Recurse | Select-Object -First 1
+        
+        if (-not $sannyExe) {
+            Write-Error "sanny.exe not found in extracted archive"
+            exit 1
+        }
+        
+        Write-Host "Found sanny.exe at: $($sannyExe.FullName)"
+        
+        # Run the compiler and capture exit code
+        & $sannyExe.FullName --compile $inputFile $outputFile
+        $exitCode = $LASTEXITCODE
+        
+        if ($exitCode -ne 0) {
+            Write-Host "Compilation exited with code: $exitCode"
+        }
+        
+    - name: Check for Errors
+      id: check-log
+      shell: powershell
+      run: |
+        if (Test-Path "compile.log") {
+            $logContent = Get-Content "compile.log" -Raw
+            if ($logContent.Length -gt 0) {
+                Write-Host "Compilation failed. Error log content:"
+                Write-Host $logContent
+                
+                # Write error log to a file for proper handling
+                $logFile = "error-log.txt"
+                $logContent | Out-File -FilePath $logFile -Encoding utf8
+                
+                # Use heredoc for multi-line output
+                $delimiter = "EOF_ERROR_LOG_$(Get-Random)"
+                "error-log<<$delimiter" >> $env:GITHUB_OUTPUT
+                $logContent >> $env:GITHUB_OUTPUT
+                $delimiter >> $env:GITHUB_OUTPUT
+                
+                echo "success=false" >> $env:GITHUB_OUTPUT
+                exit 1
+            } else {
+                Write-Host "compile.log exists but is empty"
+                echo "success=true" >> $env:GITHUB_OUTPUT
+            }
+        } else {
+            Write-Host "No compile.log found - compilation successful"
+            echo "success=true" >> $env:GITHUB_OUTPUT
+        }
+        
+    - name: Upload Compiled Output
+      if: steps.check-log.outputs.success == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: compiled-script
+        path: ${{ inputs.output-file }}
