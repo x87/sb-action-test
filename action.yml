@@ -60,6 +60,7 @@ runs:
         }
         
         Write-Host "Found sanny.exe at: $($sannyExe.FullName)"
+        Write-Host "$($sannyExe.FullName) --mode sa_sbl --no-splash --compile $inputFile $outputFile"
         
         # Run the compiler and capture exit code
         & $sannyExe.FullName --mode sa_sbl --no-splash --compile $inputFile  $outputFile
