@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
         
       - name: Compile with SannyBuilder
-        uses: ./
+        uses: x87/sb-compile-action@main
         with:
           input-file: ${{ github.event.inputs.input-file || 'script.txt' }}
           output-file: ${{ github.event.inputs.output-file || 'output.cs' }}

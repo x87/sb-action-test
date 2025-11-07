@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Compile with SannyBuilder
-        uses: x87/sb-action-test@main
+        uses: x87/sb-compile-action@main
         with:
           input-file: "path/to/your/script.txt"
           output-file: "output.cs"
@@ -74,7 +74,7 @@ jobs:
 
       - name: Compile Script
         id: compile
-        uses: x87/sb-action-test@main
+        uses: x87/sb-compile-action@main
         with:
           input-file: "script.txt"
           output-file: "compiled.scm"
