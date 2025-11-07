@@ -32,8 +32,9 @@ jobs:
         uses: x87/sb-action-test@main
         with:
           input-file: 'path/to/your/script.txt'
-          output-file: 'output.scm'
+          output-file: 'output.cs'
           sanny-version: 'v4.2.0'  # optional, defaults to v4.2.0
+          mode: 'sa_sbl'  # optional, defaults to sa_sbl
 ```
 
 ## Inputs
@@ -41,8 +42,9 @@ jobs:
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
 | `input-file` | Path to the input script file to compile | Yes | - |
-| `output-file` | Path to the output compiled file | No | `output.scm` |
+| `output-file` | Path to the output compiled file | No | `output.cs` |
 | `sanny-version` | SannyBuilder version to download | No | `v4.2.0` |
+| `mode` | Edit mode (e.g., sa_sbl, vc_sbl, gta3_sbl) | No | `sa_sbl` |
 
 ## Outputs
 
@@ -55,7 +57,7 @@ jobs:
 
 1. Downloads SannyBuilder from `https://github.com/sannybuilder/dev/releases/download/{version}/SannyBuilder-{version}.zip`
 2. Unpacks the archive
-3. Runs `sanny.exe --compile <input-file> <output-file>`
+3. Runs `sanny.exe --mode <mode> --no-splash --compile <input-file> <output-file>`
 4. Checks if `compile.log` exists and is not empty (indicates error)
 5. If successful, uploads the output file as an artifact
 6. If failed, provides error log content in outputs

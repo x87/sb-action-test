@@ -10,7 +10,7 @@ on:
       output-file:
         description: 'Path to the output file'
         required: false
-        default: 'output.scm'
+        default: 'output.cs'
 
 jobs:
   compile:
@@ -26,13 +26,13 @@ jobs:
         uses: ./
         with:
           input-file: ${{ github.event.inputs.input-file || 'script.txt' }}
-          output-file: ${{ github.event.inputs.output-file || 'output.scm' }}
+          output-file: ${{ github.event.inputs.output-file || 'output.cs' }}
           
       - name: Display Results
         if: always()
         shell: powershell
         run: |
           Write-Host "Compilation workflow completed"
-          if (Test-Path "${{ github.event.inputs.output-file || 'output.scm' }}") {
+          if (Test-Path "${{ github.event.inputs.output-file || 'output.cs' }}") {
             Write-Host "Output file created successfully"
           }
