@@ -62,7 +62,7 @@ runs:
         Write-Host "Found sanny.exe at: $($sannyExe.FullName)"
         
         # Run the compiler and capture exit code
-        & $sannyExe.FullName --compile $inputFile $outputFile
+        & $sannyExe.FullName --mode sa_sbl --no-splash --compile $inputFile  $outputFile
         $exitCode = $LASTEXITCODE
         
         if ($exitCode -ne 0) {
